@@ -1,11 +1,9 @@
 import type { GeocodeSuggestion, NormalizedWeather, SmsResult, UsageStats } from './types';
 
-// Empty by default so requests stay same-origin ("/api/..."); set VITE_API_BASE_URL
-// only when the frontend and backend are deployed to different origins.
+// Empty by default so requests stay same-origin; set only for split frontend/backend deploys.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
 
-// The public WeatherAI response schema isn't fully documented, so this picks the first
-// matching key among common naming variants (snake_case, camelCase, nested) defensively.
+// Picks the first matching key among common naming variants since WeatherAI's schema isn't fully documented.
 function pick(source: Record<string, unknown> | undefined | null, keys: string[]): unknown {
   if (!source) return undefined;
   for (const key of keys) {
@@ -99,8 +97,7 @@ export async function fetchUsage(): Promise<UsageStats> {
   return handleJson<UsageStats>(res);
 }
 
-// Doesn't throw on non-2xx — SMS is Scale-plan only, so callers need to see the
-// raw status (e.g. 403 SMS_NOT_ENABLED) rather than a generic thrown error.
+// Doesn't throw on non-2xx so callers can display the raw status (e.g. 403 SMS_NOT_ENABLED).
 export async function sendSms(to: string, message: string, type?: string): Promise<SmsResult> {
   const res = await fetch(`${API_BASE_URL}/api/sms/send`, {
     method: 'POST',

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import SearchBar from './components/SearchBar';
+import QuickActions from './components/QuickActions';
 import CurrentCard from './components/CurrentCard';
 import ForecastList from './components/ForecastList';
 import AiSummary from './components/AiSummary';
 import UsageBadge from './components/UsageBadge';
 import SmsPanel from './components/SmsPanel';
+import { CloudIcon } from './components/Icons';
 import { fetchGeocodeSuggestions, fetchWeatherByCoords, fetchWeatherByIp } from './api';
 import type { GeocodeSuggestion, NormalizedWeather } from './types';
 import './App.css';
@@ -70,7 +72,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🌦️ WeatherAI Dashboard</h1>
+        <h1><CloudIcon size={26} /> WeatherAI Dashboard</h1>
         <p className="subtitle">
           Real-time conditions, forecasts &amp; AI summaries — powered by{' '}
           <a href="https://weather-ai.co" target="_blank" rel="noopener noreferrer">WeatherAI</a>
@@ -81,27 +83,41 @@ export default function App() {
         cityInput={cityInput}
         onCityInputChange={setCityInput}
         onSearch={handleSearch}
-        onLocate={handleLocate}
-        onDetectIp={handleDetectIp}
-        units={units}
-        onUnitsChange={setUnits}
         suggestions={suggestions}
         onSelectSuggestion={selectSuggestion}
       />
 
-      {status && <section className={`status ${status.error ? 'error' : ''}`}>{status.message}</section>}
-      {loading && <section className="status">Loading…</section>}
+      <div className="layout">
+        <aside className="sidebar">
+          <QuickActions
+            onLocate={handleLocate}
+            onDetectIp={handleDetectIp}
+            units={units}
+            onUnitsChange={setUnits}
+          />
+          <UsageBadge />
+          <SmsPanel />
+        </aside>
 
-      {weather && (
-        <section className="result">
-          <CurrentCard weather={weather} />
-          <AiSummary summary={weather.aiSummary} />
-          <ForecastList forecast={weather.forecast} />
-        </section>
-      )}
+        <main className="main-content">
+          {status && <section className={`status ${status.error ? 'error' : ''}`}>{status.message}</section>}
+          {loading && <section className="status">Loading…</section>}
 
-      <UsageBadge />
-      <SmsPanel />
+          {weather ? (
+            <section className="result">
+              <CurrentCard weather={weather} />
+              <AiSummary summary={weather.aiSummary} />
+              <ForecastList forecast={weather.forecast} />
+            </section>
+          ) : (
+            !status && !loading && (
+              <section className="empty-state">
+                <p>Search a city or use your location to see current conditions.</p>
+              </section>
+            )
+          )}
+        </main>
+      </div>
     </div>
   );
 }

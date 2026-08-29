@@ -2,8 +2,7 @@ import type { Request, Response } from 'express';
 import { fetchWeatherAI, postWeatherAI } from '../utils/weatherAiClient';
 import type { BometRegisterPayload, SmsAlertPayload, SmsAlertType, SmsSendPayload } from '../types/weatherAi.types';
 
-// SMS routes require the Scale plan + admin compliance approval; WeatherAI returns
-// 403 SMS_NOT_ENABLED until then, which is passed through as-is for the frontend to display.
+// SMS requires the Scale plan + admin approval; WeatherAI's 403 SMS_NOT_ENABLED is passed through as-is.
 
 const ALERT_TYPES: SmsAlertType[] = ['rain', 'frost', 'extreme_wind', 'drought'];
 
@@ -11,7 +10,6 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-// POST /api/sms/send
 export async function sendSms(req: Request, res: Response): Promise<void> {
   const body = req.body as SmsSendPayload;
   if (!isNonEmptyString(body?.to) || !isNonEmptyString(body?.message)) {
@@ -27,7 +25,6 @@ export async function sendSms(req: Request, res: Response): Promise<void> {
   }
 }
 
-// POST /api/sms/alert
 export async function sendSmsAlert(req: Request, res: Response): Promise<void> {
   const body = req.body as SmsAlertPayload;
   if (!isNonEmptyString(body?.to) || !ALERT_TYPES.includes(body?.alertType)) {
@@ -43,7 +40,6 @@ export async function sendSmsAlert(req: Request, res: Response): Promise<void> {
   }
 }
 
-// POST /api/sms/bomet/register
 export async function registerBometFarmer(req: Request, res: Response): Promise<void> {
   const body = req.body as BometRegisterPayload;
   if (!isNonEmptyString(body?.phone) || !isNonEmptyString(body?.name)) {
@@ -59,7 +55,6 @@ export async function registerBometFarmer(req: Request, res: Response): Promise<
   }
 }
 
-// GET /api/sms/stats
 export async function getSmsStats(_req: Request, res: Response): Promise<void> {
   try {
     const { status, data } = await fetchWeatherAI('/sms/stats', {});
@@ -69,7 +64,6 @@ export async function getSmsStats(_req: Request, res: Response): Promise<void> {
   }
 }
 
-// GET /api/sms/health
 export async function getSmsHealth(_req: Request, res: Response): Promise<void> {
   try {
     const { status, data } = await fetchWeatherAI('/sms/health', {});

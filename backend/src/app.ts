@@ -7,8 +7,7 @@ import { apiLimiter } from './middleware/rateLimiter';
 
 const app = express();
 
-// Only needed when the frontend is deployed on a different origin than this API
-// (same-origin deployments, e.g. this repo's default build, don't require CORS at all).
+// CORS is only needed when the frontend is deployed on a different origin than this API.
 const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean);
 if (corsOrigins.length > 0) {
   app.use(cors({ origin: corsOrigins }));

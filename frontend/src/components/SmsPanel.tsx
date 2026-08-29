@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { sendSms } from '../api';
+import { MessageIcon } from './Icons';
 
 export default function SmsPanel() {
   const [to, setTo] = useState('');
@@ -33,7 +34,7 @@ export default function SmsPanel() {
 
   return (
     <section className="sms-panel">
-      <h3>📲 Send SMS <span className="muted">(Scale plan only)</span></h3>
+      <h3><MessageIcon /> Send SMS <span className="muted">(Scale plan only)</span></h3>
       <form className="sms-form" onSubmit={handleSubmit}>
         <input
           type="tel"

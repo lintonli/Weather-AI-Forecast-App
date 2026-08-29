@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { fetchUsage } from '../api';
 import type { UsageStats } from '../types';
+import { ChartIcon } from './Icons';
 
 export default function UsageBadge() {
   const [usage, setUsage] = useState<UsageStats | null>(null);
@@ -16,14 +17,15 @@ export default function UsageBadge() {
   };
 
   return (
-    <footer className="app-footer">
-      <button type="button" onClick={loadUsage}>View API usage</button>
-      {error && <span className="muted">{error}</span>}
+    <section className="usage-badge">
+      <h3><ChartIcon /> API Usage</h3>
+      <button type="button" onClick={loadUsage}>Check usage</button>
+      {error && <p className="muted">{error}</p>}
       {usage && (
-        <span className="muted">
+        <p className="muted">
           {usage.requests_used ?? '?'} / {usage.requests_limit ?? '?'} requests used this period
-        </span>
+        </p>
       )}
-    </footer>
+    </section>
   );
 }
