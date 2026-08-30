@@ -44,18 +44,70 @@ export function GlobeIcon({ size = 18 }: IconProps) {
   );
 }
 
-export function MessageIcon({ size = 18 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
-      <path d="M21 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v9Z" />
-    </svg>
-  );
-}
-
 export function ChartIcon({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
       <path d="M4 20V10M12 20V4M20 20v-7" />
+    </svg>
+  );
+}
+
+export function SunIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+
+export function MoonIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />
+    </svg>
+  );
+}
+
+export function CloudRainIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M6.5 16a4.5 4.5 0 0 1-.5-8.98A6 6 0 0 1 17.6 5.5 4 4 0 0 1 17 14H6.5Z" />
+      <path d="M8 19v1M12 19v1M16 19v1" />
+    </svg>
+  );
+}
+
+export function CloudSnowIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M6.5 16a4.5 4.5 0 0 1-.5-8.98A6 6 0 0 1 17.6 5.5 4 4 0 0 1 17 14H6.5Z" />
+      <path d="M8 19v.01M12 19v.01M16 19v.01M8 21v.01M12 21v.01M16 21v.01" />
+    </svg>
+  );
+}
+
+export function FogIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M4 8h12M3 12h18M4 16h12M3 20h18" />
+    </svg>
+  );
+}
+
+export function BoltIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M6.5 16a4.5 4.5 0 0 1-.5-8.98A6 6 0 0 1 17.6 5.5 4 4 0 0 1 17 14H14l-3 6-1-4H8Z" />
+    </svg>
+  );
+}
+
+export function CompassIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m14.5 9.5-1.5 5-5 1.5 1.5-5Z" />
     </svg>
   );
 }

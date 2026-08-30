@@ -5,7 +5,6 @@ import CurrentCard from './components/CurrentCard';
 import ForecastList from './components/ForecastList';
 import AiSummary from './components/AiSummary';
 import UsageBadge from './components/UsageBadge';
-import SmsPanel from './components/SmsPanel';
 import { CloudIcon } from './components/Icons';
 import { fetchGeocodeSuggestions, fetchWeatherByCoords, fetchWeatherByIp } from './api';
 import type { GeocodeSuggestion, NormalizedWeather } from './types';
@@ -47,9 +46,10 @@ export default function App() {
     }
   };
 
-  const selectSuggestion = (lat: number, lon: number) => {
+  const selectSuggestion = (suggestion: GeocodeSuggestion) => {
     setSuggestions([]);
-    loadWeather(() => fetchWeatherByCoords(lat, lon, units));
+    const locationName = [suggestion.name, suggestion.admin1, suggestion.country].filter(Boolean).join(', ');
+    loadWeather(() => fetchWeatherByCoords(suggestion.lat, suggestion.lon, units, locationName));
   };
 
   const handleLocate = () => {
@@ -59,7 +59,10 @@ export default function App() {
     }
     setStatus({ message: 'Getting your location…', error: false });
     navigator.geolocation.getCurrentPosition(
-      (pos) => loadWeather(() => fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude, units)),
+      (pos) =>
+        loadWeather(() =>
+          fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude, units, 'My location')
+        ),
       () => setStatus({ message: 'Location access denied.', error: true })
     );
   };
@@ -96,7 +99,6 @@ export default function App() {
             onUnitsChange={setUnits}
           />
           <UsageBadge />
-          <SmsPanel />
         </aside>
 
         <main className="main-content">
@@ -107,7 +109,7 @@ export default function App() {
             <section className="result">
               <CurrentCard weather={weather} />
               <AiSummary summary={weather.aiSummary} />
-              <ForecastList forecast={weather.forecast} />
+              <ForecastList forecast={weather.forecast} hourly={weather.hourly} units={weather.units} />
             </section>
           ) : (
             !status && !loading && (

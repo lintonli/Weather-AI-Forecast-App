@@ -1,11 +1,19 @@
 import React from 'react';
 
+interface Suggestion {
+  name: string;
+  country?: string;
+  admin1?: string;
+  lat: number;
+  lon: number;
+}
+
 interface Props {
   cityInput: string;
   onCityInputChange: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
-  suggestions: { name: string; country?: string; admin1?: string; lat: number; lon: number }[];
-  onSelectSuggestion: (lat: number, lon: number) => void;
+  suggestions: Suggestion[];
+  onSelectSuggestion: (suggestion: Suggestion) => void;
 }
 
 export default function SearchBar({
@@ -31,7 +39,7 @@ export default function SearchBar({
       {suggestions.length > 0 && (
         <ul className="suggestions">
           {suggestions.map((s, i) => (
-            <li key={`${s.name}-${i}`} onClick={() => onSelectSuggestion(s.lat, s.lon)}>
+            <li key={`${s.name}-${i}`} onClick={() => onSelectSuggestion(s)}>
               {s.name}{s.admin1 ? `, ${s.admin1}` : ''}{s.country ? `, ${s.country}` : ''}
             </li>
           ))}

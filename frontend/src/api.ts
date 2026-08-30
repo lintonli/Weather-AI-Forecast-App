@@ -1,60 +1,63 @@
-import type { GeocodeSuggestion, NormalizedWeather, SmsResult, UsageStats } from './types';
+import type {
+  GeocodeSuggestion,
+  HourlyPoint,
+  ForecastDay,
+  NormalizedWeather,
+  RawWeatherResponse,
+  UsageStats,
+} from './types';
 
 // Empty by default so requests stay same-origin; set only for split frontend/backend deploys.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
-
-// Picks the first matching key among common naming variants since WeatherAI's schema isn't fully documented.
-function pick(source: Record<string, unknown> | undefined | null, keys: string[]): unknown {
-  if (!source) return undefined;
-  for (const key of keys) {
-    if (source[key] !== undefined && source[key] !== null) return source[key];
-  }
-  return undefined;
-}
 
 function asNumber(value: unknown): number | null {
   const num = Number(value);
   return Number.isFinite(num) ? num : null;
 }
 
-function asString(value: unknown, fallback = ''): string {
-  return typeof value === 'string' && value.length > 0 ? value : fallback;
-}
+// WeatherAI's /v1/weather response has no location name, so callers supply one
+// (from a geocode suggestion, "My location", or the IP-based geo.city fallback below).
+export function normalizeWeather(
+  raw: unknown,
+  units: 'metric' | 'imperial',
+  locationName = 'Selected location'
+): NormalizedWeather {
+  const data = (raw ?? {}) as RawWeatherResponse;
+  const current = data.current ?? {};
 
-export function normalizeWeather(raw: unknown, units: 'metric' | 'imperial'): NormalizedWeather {
-  const data = (raw ?? {}) as Record<string, unknown>;
-  const location = (data.location ?? data.loc ?? {}) as Record<string, unknown>;
-  const current = (data.current ?? data.current_conditions ?? {}) as Record<string, unknown>;
-  const forecastRaw = (data.forecast ?? data.daily ?? data.days ?? []) as Record<string, unknown>[];
+  const forecast: ForecastDay[] = (data.daily ?? []).map((day) => ({
+    date: day.date ?? '',
+    weatherCode: asNumber(day.weathercode),
+    tempMin: asNumber(day.temp_min),
+    tempMax: asNumber(day.temp_max),
+    precipitation: asNumber(day.precipitation),
+  }));
 
-  const locationName = asString(
-    pick(location, ['name', 'city']) as string | undefined,
-    asString(pick(data, ['location_name', 'city']) as string | undefined, 'Selected location')
-  );
+  const hourly: HourlyPoint[] = (data.hourly ?? []).map((hour) => ({
+    time: hour.time ?? '',
+    temperature: asNumber(hour.temp),
+    precipitation: asNumber(hour.precipitation),
+    weatherCode: asNumber(hour.weathercode),
+  }));
 
-  const forecast = Array.isArray(forecastRaw)
-    ? forecastRaw.map((day) => ({
-        date: asString(pick(day, ['date', 'day', 'time']) as string | undefined, ''),
-        condition: asString(pick(day, ['condition', 'summary', 'description']) as string | undefined, '—'),
-        tempMin: asNumber(pick(day, ['temp_min', 'temperature_min', 'min_temp', 'low'])),
-        tempMax: asNumber(pick(day, ['temp_max', 'temperature_max', 'max_temp', 'high'])),
-      }))
-    : [];
+  const geoName = data.geo?.city
+    ? [data.geo.city, data.geo.region, data.geo.country].filter(Boolean).join(', ')
+    : null;
 
   return {
-    locationName,
+    locationName: geoName ?? locationName,
     units,
     current: {
-      temperature: asNumber(pick(current, ['temperature', 'temp', 'temp_c', 'temp_f'])),
-      feelsLike: asNumber(pick(current, ['feels_like', 'feelslike', 'apparent_temperature'])),
-      condition: asString(pick(current, ['condition', 'summary', 'description']) as string | undefined, '—'),
-      humidity: asNumber(pick(current, ['humidity', 'relative_humidity'])),
-      windSpeed: asNumber(pick(current, ['wind_speed', 'windspeed', 'wind'])),
-      precipitation: asNumber(pick(current, ['precipitation', 'precip', 'rain'])),
-      time: (pick(current, ['time', 'observation_time', 'updated_at']) as string | undefined) ?? null,
+      temperature: asNumber(current.temperature),
+      windSpeed: asNumber(current.windspeed),
+      windDirection: asNumber(current.winddirection),
+      isDay: current.is_day !== 0,
+      weatherCode: asNumber(current.weathercode),
+      time: current.time ?? null,
     },
     forecast,
-    aiSummary: (pick(data, ['ai_summary', 'summary', 'insight']) as string | undefined) ?? null,
+    hourly,
+    aiSummary: data.ai_summary ?? null,
     raw: data,
   };
 }
@@ -71,12 +74,13 @@ async function handleJson<T>(res: Response): Promise<T> {
 export async function fetchWeatherByCoords(
   lat: number,
   lon: number,
-  units: 'metric' | 'imperial'
+  units: 'metric' | 'imperial',
+  locationName?: string
 ): Promise<NormalizedWeather> {
-  const params = new URLSearchParams({ lat: String(lat), lon: String(lon), units });
+  const params = new URLSearchParams({ lat: String(lat), lon: String(lon), units, days: '7' });
   const res = await fetch(`${API_BASE_URL}/api/weather?${params}`);
   const data = await handleJson<unknown>(res);
-  return normalizeWeather(data, units);
+  return normalizeWeather(data, units, locationName);
 }
 
 export async function fetchWeatherByIp(units: 'metric' | 'imperial'): Promise<NormalizedWeather> {
@@ -95,15 +99,4 @@ export async function fetchGeocodeSuggestions(city: string): Promise<GeocodeSugg
 export async function fetchUsage(): Promise<UsageStats> {
   const res = await fetch(`${API_BASE_URL}/api/usage`);
   return handleJson<UsageStats>(res);
-}
-
-// Doesn't throw on non-2xx so callers can display the raw status (e.g. 403 SMS_NOT_ENABLED).
-export async function sendSms(to: string, message: string, type?: string): Promise<SmsResult> {
-  const res = await fetch(`${API_BASE_URL}/api/sms/send`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to, message, type }),
-  });
-  const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, status: res.status, data };
 }

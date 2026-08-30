@@ -23,7 +23,8 @@ export default function UsageBadge() {
       {error && <p className="muted">{error}</p>}
       {usage && (
         <p className="muted">
-          {usage.requests_used ?? '?'} / {usage.requests_limit ?? '?'} requests used this period
+          {usage.plan && <>{usage.plan} plan — </>}
+          {usage.unlimited ? 'unlimited requests' : `${usage.used ?? '?'} / ${usage.limit ?? '?'} requests used`}
         </p>
       )}
     </section>

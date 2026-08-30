@@ -32,25 +32,3 @@ export async function fetchWeatherAI(endpoint: string, params: QueryParams): Pro
     clearTimeout(timeout);
   }
 }
-
-// Same as fetchWeatherAI but for JSON POST bodies (used by the SMS endpoints).
-export async function postWeatherAI(endpoint: string, body: unknown): Promise<WeatherAIResponse> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
-  try {
-    const res = await fetch(`${WEATHER_AI_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${WEATHER_AI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body ?? {}),
-      signal: controller.signal,
-    });
-    const data = await res.json().catch(() => ({}));
-    return { status: res.status, data };
-  } finally {
-    clearTimeout(timeout);
-  }
-}
