@@ -7,7 +7,6 @@ import type {
   UsageStats,
 } from './types';
 
-// Backend and frontend always run/deploy separately, so this must point at the backend's URL.
 const API_BASE_URL = import.meta.env.API_BASE_URL?.replace(/\/$/, '') ?? '';
 
 function asNumber(value: unknown): number | null {
@@ -15,8 +14,6 @@ function asNumber(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
-// WeatherAI's /v1/weather response has no location name, so callers supply one
-// (from a geocode suggestion, "My location", or the IP-based geo.city fallback below).
 export function normalizeWeather(
   raw: unknown,
   units: 'metric' | 'imperial',

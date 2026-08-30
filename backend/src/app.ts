@@ -6,8 +6,6 @@ import { apiLimiter } from './middleware/rateLimiter';
 
 const app = express();
 
-// This API is deployed separately from the frontend, so CORS is required, not optional.
-// CORS_ORIGIN must list the frontend's exact origin(s), comma-separated.
 const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean);
 app.use(cors({ origin: corsOrigins }));
 

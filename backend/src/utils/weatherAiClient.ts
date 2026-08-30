@@ -9,7 +9,6 @@ if (!WEATHER_AI_API_KEY) {
 
 type QueryParams = Record<string, string | number | boolean | undefined>;
 
-// Calls WeatherAI with the server-side API key — the key never reaches the browser.
 export async function fetchWeatherAI(endpoint: string, params: QueryParams): Promise<WeatherAIResponse> {
   const url = new URL(`${WEATHER_AI_BASE_URL}${endpoint}`);
   Object.entries(params).forEach(([key, value]) => {

@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 import type { GeocodeResult } from '../types/weatherAi.types';
 
-// Proxies Open-Meteo's free geocoding API since WeatherAI itself only accepts lat/lon.
 export async function getGeocodeSuggestions(req: Request, res: Response): Promise<void> {
   const city = String(req.query.city || '').trim();
   if (!city) {
