@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   // Absolute backend URL — leave unset when served from the same origin/deployment.
-  readonly VITE_API_BASE_URL?: string;
+  readonly API_BASE_URL?: string;
 }
 
 interface ImportMeta {

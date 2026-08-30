@@ -8,7 +8,7 @@ import type {
 } from './types';
 
 // Empty by default so requests stay same-origin; set only for split frontend/backend deploys.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
+const API_BASE_URL = import.meta.env.API_BASE_URL?.replace(/\/$/, '') ?? '';
 
 function asNumber(value: unknown): number | null {
   const num = Number(value);
