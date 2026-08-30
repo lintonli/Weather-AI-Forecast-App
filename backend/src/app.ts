@@ -8,11 +8,11 @@ import { apiLimiter } from './middleware/rateLimiter';
 const app = express();
 
 // CORS is only needed when the frontend is deployed on a different origin than this API.
-const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean);
-if (corsOrigins.length > 0) {
-  app.use(cors({ origin: corsOrigins }));
-}
-
+// const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean);
+// if (corsOrigins.length > 0) {
+//   app.use(cors({ origin: corsOrigins }));
+// }
+ app.use(cors);
 app.use(express.json());
 
 const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
