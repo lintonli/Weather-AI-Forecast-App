@@ -7,7 +7,7 @@ import type {
   UsageStats,
 } from './types';
 
-// Empty by default so requests stay same-origin; set only for split frontend/backend deploys.
+// Backend and frontend always run/deploy separately, so this must point at the backend's URL.
 const API_BASE_URL = import.meta.env.API_BASE_URL?.replace(/\/$/, '') ?? '';
 
 function asNumber(value: unknown): number | null {

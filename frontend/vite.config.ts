@@ -1,20 +1,17 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Dev server proxies /api to the Express backend so the browser never needs the API key.
-// Target is configurable via DEV_API_PROXY_TARGET in case the backend runs on a non-default port.
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  return {
-    plugins: [react()],
-    server: {
-      port: 5173,
-      proxy: {
-        '/api': env.DEV_API_PROXY_TARGET || 'http://localhost:3000',
-      },
-    },
-    build: {
-      outDir: 'dist',
-    },
-  };
+// No dev proxy — the frontend always talks directly to the backend via API_BASE_URL,
+// so the backend's CORS_ORIGIN must allow this dev server's origin (http://localhost:5173).
+// envPrefix widens Vite's default VITE_-only client env exposure to also include API_*.
+export default defineConfig({
+  plugins: [react()],
+  envPrefix: 'API_',
+  server: {
+    port: 5173,
+  },
+  build: {
+    outDir: 'dist',
+  },
 });
+

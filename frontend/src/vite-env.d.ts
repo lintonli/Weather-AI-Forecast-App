@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  // Absolute backend URL — leave unset when served from the same origin/deployment.
+  // Required: the backend's absolute URL, e.g. http://localhost:3000 in dev.
   readonly API_BASE_URL?: string;
 }
 
