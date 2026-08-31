@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchBar from './components/SearchBar';
 import QuickActions from './components/QuickActions';
 import CurrentCard from './components/CurrentCard';
@@ -10,6 +10,8 @@ import { fetchGeocodeSuggestions, fetchWeatherByCoords, fetchWeatherByIp } from 
 import type { GeocodeSuggestion, NormalizedWeather } from './types';
 import './App.css';
 
+type LastLookup = { type: 'coords'; lat: number; lon: number; locationName: string } | { type: 'ip' };
+
 export default function App() {
   const [cityInput, setCityInput] = useState('');
   const [units, setUnits] = useState<'metric' | 'imperial'>('metric');
@@ -17,6 +19,7 @@ export default function App() {
   const [weather, setWeather] = useState<NormalizedWeather | null>(null);
   const [status, setStatus] = useState<{ message: string; error: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lastLookup, setLastLookup] = useState<LastLookup | null>(null);
 
   const loadWeather = async (task: () => Promise<NormalizedWeather>) => {
     setLoading(true);
@@ -29,6 +32,17 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  // Re-run the last lookup when units changes so results refresh without a manual re-search.
+  useEffect(() => {
+    if (!lastLookup) return;
+    if (lastLookup.type === 'coords') {
+      loadWeather(() => fetchWeatherByCoords(lastLookup.lat, lastLookup.lon, units, lastLookup.locationName));
+    } else {
+      loadWeather(() => fetchWeatherByIp(units));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +63,7 @@ export default function App() {
   const selectSuggestion = (suggestion: GeocodeSuggestion) => {
     setSuggestions([]);
     const locationName = [suggestion.name, suggestion.admin1, suggestion.country].filter(Boolean).join(', ');
+    setLastLookup({ type: 'coords', lat: suggestion.lat, lon: suggestion.lon, locationName });
     loadWeather(() => fetchWeatherByCoords(suggestion.lat, suggestion.lon, units, locationName));
   };
 
@@ -59,16 +74,19 @@ export default function App() {
     }
     setStatus({ message: 'Getting your location…', error: false });
     navigator.geolocation.getCurrentPosition(
-      (pos) =>
+      (pos) => {
+        setLastLookup({ type: 'coords', lat: pos.coords.latitude, lon: pos.coords.longitude, locationName: 'My location' });
         loadWeather(() =>
           fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude, units, 'My location')
-        ),
+        );
+      },
       () => setStatus({ message: 'Location access denied.', error: true })
     );
   };
 
   const handleDetectIp = () => {
     setStatus({ message: 'Detecting location by IP…', error: false });
+    setLastLookup({ type: 'ip' });
     loadWeather(() => fetchWeatherByIp(units));
   };
 
